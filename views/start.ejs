@@ -15,56 +15,71 @@
 </head>
 <body>
 <div class="container">
-  <div class="row">
-    <div class="col">
-      <h3>Red Team</h3>
-      <div id="redTeam">
-        <% redTeam.forEach(player => { %>
-          <div><%= player.name %></div>  
-          <% if (player.position === currentPlayer && player.name === user) { %>
-            <div class="row">
-              <div class="col">
-                <button type="submit" onclick="startTimer();">Start</button>
-              </div>
-            </div>
-         <% } %>
-        <% }) %>
-      </div>
-    </div>
-    
-
-    <div class="col">
-      <h3>Blue Team</h3>
-      <div id="blueTeam">
-        <% blueTeam.forEach(player => { %>
-          <div><%= player.name %></div>
-          <% if (player.position === currentPlayer && player.name === user) { %>
-            <div class="row">
-              <div class="col">
-                <button type="submit" onclick="startTimer();">Start</button>
-              </div>
-            </div>
-         <% } %>           
-        <% }) %>
-      </div>
-    </div>
-  </div>
-
-
 
   <div class="row">
     <div class="col">
-      <button type="submit" id="startGame" style="display: none;" >Start</button>
+      <h3 class="d-flex justify-content-center">Red Team</h3>
+      <% players.forEach(player => { %>
+        <div class="row">
+          <div class="col d-flex justify-content-center">
+            <% if (player.team == 'red') { %>
+              <%= player.name %>
+            <% } %>            
+          </div>
+        </div>
+      <% }) %>
+      </div>
+      <div class="col">
+        <h3 class="d-flex justify-content-center">Blue Team</h3>
+        <% players.forEach(player => { %>
+          <div class="row">
+            <div class="col d-flex justify-content-center">
+              <% if (player.team == 'blue') { %>
+                <%= player.name %>
+              <% } %>            
+            </div>
+          </div>
+        <% }) %>
+        </div>
+      </div>
+
+    </br>
+  </br>
+</br>
+</br>
+</br>
+</br>
+        <% players.forEach(player => { %>
+          <% if (player.position === currentPlayer && player.name === user) { %>
+            <div class="row">
+              <div class="col d-flex justify-content-center">
+                <button id="startButton" type="submit" onclick="startTimer();">Start</button>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col">
+                <p id="words"></p>
+              </div>
+            </div>
+
+        <% } %>
+       <% }) %>
+
+  </br>
+</br>
+</br>
+</br>
+    <div class="row">
+      <div class="col d-flex justify-content-center">    
+        <h3 id="countdown"></h3>
+      </div>
     </div>
-  </div>
 </div>
-
-<div id="countdown"></div>
 
 </body>
 <script>
   var currentPlayer=<%= currentPlayer %>;
   var room='<%- room %>';
-  console.log(currentPlayer)
 </script>
 </html>

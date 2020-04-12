@@ -102,7 +102,7 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
     team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
     room: req.body.room
   }
-  rooms[req.body.room] = { noOfPlayers: req.body.noOfPlayers, players: [player] }
+  rooms[req.body.room] = { noOfPlayers: req.body.noOfPlayers, players: [player], pot1: [], pot2: [] }
   assignTeam(player)
   res.redirect(req.body.room)
   // Send message that new room was created
@@ -125,24 +125,34 @@ app.post('/player', (req, res) => {
   }
   rooms[req.body.room].players.push(player)
   newPlayer(player)
-  if (rooms[player.room].players.length == rooms[player.room].noOfPlayers) {
-    io.emit('start-game', player.room)
-  } else {
-    res.redirect(req.body.room)
-  }
+  res.redirect(req.body.room)
 })
 
+app.post('/fourWords', (req, res) => {
+  req.body.word.forEach(word => {
+    rooms[req.body.room].pot1.push(word)
+  })
+  if (rooms[req.body.room].noOfPlayers * 4 == rooms[req.body.room].pot1.length) {
+      var players = redTeam.concat(blueTeam)
+      var dbRoom = { 'room': req.body.room, 'noOfPlayers': rooms[req.body.room].noOfPlayers, 'players': players, pot1: rooms[req.body.room].pot1, pot2: [] }
+      db.collection('rooms').insertOne(dbRoom, (err, result) => {
+        if (err) return console.log(err)
+
+        console.log('saved to database')
+      })
+    io.emit('start-game', req.body.room)
+  }
+})
 app.get('/:room/start/:currentPlayer', (req, res) => {
   db.collection('rooms').findOne({ room: req.params.room }, function (err, room) {
-     var rTeam = room.redTeam
-     var bTeam = room.blueTeam
+     var players = room.players
      var noOfPlayers = parseInt(room.noOfPlayers)
      var currentPlayer = parseInt(req.params.currentPlayer)
      if (currentPlayer > room.noOfPlayers) {
        currentPlayer = 1
      }
      var user = req.session.passport.username
-     res.render('start', { redTeam: rTeam, blueTeam: bTeam, currentPlayer: currentPlayer, user: user, room: room.room })
+     res.render('start', { players: players, currentPlayer: currentPlayer, user: user, room: room.room })
   });
 })
 
@@ -160,10 +170,12 @@ io.on('connection', socket => {
     socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id] })
   })
 
-  socket.on('start-timer', () => {
+  socket.on('start-timer', room => {
+    var pot1 = getPot1(room)
+    socket.emit('show-pot', pot1)
     var counter = 5;
     var WinnerCountdown = setInterval(function(){
-      io.emit('counter', counter);
+      io.emit('counter', { counter: counter, pot1: pot1 });
       counter--
       if (counter === 0) {
         clearInterval(WinnerCountdown);
@@ -184,14 +196,7 @@ function newPlayer(player) {
     if (rooms[player.room].players.length == rooms[player.room].noOfPlayers) {
       setRedTeamNo(redTeam)
       setBlueTeamNo(blueTeam)
-      var dbRoom = { 'room': player.room, 'noOfPlayers': rooms[player.room].noOfPlayers, 'redTeam': redTeam, 'blueTeam': blueTeam }
-      db.collection('rooms').insertOne(dbRoom, (err, result) => {
-        if (err) return console.log(err)
-
-        console.log('saved to database')
-      })
     } else {
-
     }
 }
 
@@ -227,5 +232,12 @@ function assignTeam(player) {
       } else {
         redTeam.push(player)
       }
-    }
+    }   
+}
+
+function getPot1(room) {
+  db.collection('rooms').findOne({ room: room }, function (err, room) {
+    console.log(room)
+    return room.pot1
+  });
 }

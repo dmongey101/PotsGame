@@ -10,6 +10,26 @@ const redTeamContainer = document.getElementById('redTeam')
 const blueTeamContainer = document.getElementById('blueTeam')
 const startGameButton = document.getElementById('startGame')
 
+
+$("#fourWords").submit(function(e) {
+
+    e.preventDefault();
+
+    var form = $(this);
+    var url = form.attr('action');
+    $.ajax({
+           type: "POST",
+           url: url,
+           data: form.serialize(),
+           success: function(data)
+           { 
+           }
+         });
+    $('#fourWordsModal').hide();;
+
+});
+
+
 socket.on('room-created', room => {
   const roomElement = document.createElement('div')
   roomElement.innerText = room
@@ -28,9 +48,9 @@ socket.on('chat-message', data => {
   appendMessage(`${data.name}: ${data.message}`)
 })
 
-socket.on('counter', count => {
-  document.getElementById("countdown").innerHTML = count
-  if (count===1) {
+socket.on('counter', data => {
+  document.getElementById("countdown").innerHTML = data.count
+  if (data.count===1) {
     currentPlayer ++
     var myForm = document.createElement('form');
     myForm.setAttribute('action', '/nextPlayer');
@@ -52,15 +72,6 @@ socket.on('counter', count => {
   }
 })
 
-// socket.on('user-connected', player => {
-//     if (player.team == 'blue') {
-//       appendBluePlayer(player.name)
-//   } else {
-//       appendRedPlayer(player.name)
-//   }
-// })
-
-
 socket.on('user-disconnected', player => {
 
 })
@@ -70,10 +81,10 @@ socket.on('start-game', room => {
   window.location = url
 })
 
-socket.on('show-start', currentPlayer => {
-  if (currentPlayer === socket.id) {
-    startGameButton.style.display = 'block'
-  }
+socket.on('show-pot', pot1 => {
+  console.log(pot1)
+  var firstWord = pot1[Math.floor(Math.random() * pot1.length)]
+  $('#word').innerHTML = firstWord;
 })
 
 // function appendPlayer(player) {
@@ -96,5 +107,6 @@ function showRoomForm() {
 }
 
 function startTimer() {
-  socket.emit('start-timer')
+  $("#startButton").hide()
+  socket.emit('start-timer', room)
   }
