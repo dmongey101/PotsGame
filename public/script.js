@@ -9,6 +9,8 @@ const messageInput = document.getElementById('message-input')
 const redTeamContainer = document.getElementById('redTeam')
 const blueTeamContainer = document.getElementById('blueTeam')
 const startGameButton = document.getElementById('startGame')
+var potArray1 = []
+var potArray2 = []
 
 
 $("#fourWords").submit(function(e) {
@@ -48,26 +50,44 @@ socket.on('chat-message', data => {
   appendMessage(`${data.name}: ${data.message}`)
 })
 
-socket.on('counter', data => {
-  document.getElementById("countdown").innerHTML = data.count
-  if (data.count===1) {
+socket.on('counter', count => {
+  document.getElementById("countdown").innerHTML = count
+  if (count===1) {
     currentPlayer ++
+
     var myForm = document.createElement('form');
     myForm.setAttribute('action', '/nextPlayer');
     myForm.setAttribute('method', 'post');
     myForm.setAttribute('hidden', 'true');
+
     var currentPlayerInput = document.createElement('input');
     currentPlayerInput.setAttribute('type', 'number');
     currentPlayerInput.setAttribute('name', 'currentPlayer');
     currentPlayerInput.setAttribute('value', currentPlayer);
     myForm.appendChild(currentPlayerInput);
     document.body.appendChild(myForm);
+
     var roomInput = document.createElement('input');
     roomInput.setAttribute('type', 'text');
     roomInput.setAttribute('name', 'room');
     roomInput.setAttribute('value', room);
     myForm.appendChild(roomInput);
     document.body.appendChild(myForm);
+
+    var pot1Input = document.createElement('input');
+    pot1Input.setAttribute('type', 'text');
+    pot1Input.setAttribute('name', 'pot1');
+    pot1Input.setAttribute('value', JSON.stringify(potArray1));
+    myForm.appendChild(pot1Input);
+    document.body.appendChild(myForm);
+
+    var pot2Input = document.createElement('input');
+    pot2Input.setAttribute('type', 'text');
+    pot2Input.setAttribute('name', 'pot2');
+    pot2Input.setAttribute('value', JSON.stringify(potArray2));
+    myForm.appendChild(pot2Input);
+    document.body.appendChild(myForm);
+
     myForm.submit();
   }
 })
@@ -82,9 +102,10 @@ socket.on('start-game', room => {
 })
 
 socket.on('show-pot', pot1 => {
-  console.log(pot1)
-  var firstWord = pot1[Math.floor(Math.random() * pot1.length)]
-  $('#word').innerHTML = firstWord;
+  potArray1 = pot1
+  var firstWord = potArray1[Math.floor(Math.random() * potArray1.length)]
+  document.getElementById('word').innerHTML = firstWord
+  $('#nextButton').show()
 })
 
 // function appendPlayer(player) {
@@ -110,3 +131,16 @@ function startTimer() {
   $("#startButton").hide()
   socket.emit('start-timer', room)
   }
+
+function nextWord() {
+  var wordToRemove = $('#word').html()
+  var i = potArray1.indexOf(wordToRemove)
+  if (i > -1) {
+    potArray1.splice(i, 1);
+    potArray2.push(wordToRemove)
+  }
+
+  var word = potArray1[Math.floor(Math.random() * potArray1.length)]
+  document.getElementById('word').innerHTML = word
+
+}

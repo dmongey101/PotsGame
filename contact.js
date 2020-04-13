@@ -1,179 +1,231 @@
 function ShowHideSections(executionContext) {
 	debugger;
-	var formContext = executionContext.getFormContext();
-	var var_at = formContext.getAttribute("dpms_assessmenttype").getValue();
-	var tabObj = formContext.ui.tabs.get("general");
-	var triagesection = tabObj.sections.get("triage");
-	var initsection = tabObj.sections.get("initialassessment");
-	var fusection = tabObj.sections.get("fuassessment");
-	var ffsection = tabObj.sections.get("assessment");
-	var pasection = tabObj.sections.get("positivepatientassess");
-	var inpatient = tabObj.sections.get("inpatient_observation");
-	var ambulatory = tabObj.sections.get("amb_Assess");
-	var formType = formContext.ui.getFormType();
-	var formCanBeEdited = 0;
-	if (formType == 1 || formType == 2) formCanBeEdited = 1;
+
+	var isCareFacilityForm = 0;
+
+	var globalContext = Xrm.Utility.getGlobalContext();
+	globalContext.getCurrentAppName().then(
+		function success(result) {
+			
+			var formContext = executionContext.getFormContext();
+			var var_at = formContext.getAttribute("dpms_assessmenttype").getValue();
+			var tabObj = formContext.ui.tabs.get("general");
+			var triagesection = tabObj.sections.get("triage");
+			var initsection = tabObj.sections.get("initialassessment");
+			var fusection = tabObj.sections.get("fuassessment");
+			var ffsection = tabObj.sections.get("assessment");
+			var pasection = tabObj.sections.get("positivepatientassess");
+			var inpatient = tabObj.sections.get("inpatient_observation");
+			var ambulatory = tabObj.sections.get("amb_Assess");
+			var formType = formContext.ui.getFormType();
+			var formCanBeEdited = 0;
+			if (formType == 1 || formType == 2) formCanBeEdited = 1;
+
+			if (result == 'Care Facility') {
+				
+				formContext.getAttribute("dpms_assessmenttype").setValue(774460006)
+
+				triagesection.setVisible(false);
+				initsection.setVisible(false);
+				fusection.setVisible(false);
+				ffsection.setVisible(false);
+				pasection.setVisible(false);
+				inpatient.setVisible(true);
+				ambulatory.setVisible(false);
+				
+				formContext.getControl("dpms_assessmenttype").removeOption(774460000)
+				formContext.getControl("dpms_assessmenttype").removeOption(774460001)
+				formContext.getControl("dpms_assessmenttype").removeOption(774460005)
+				formContext.getControl("dpms_assessmenttype").removeOption(774460007)
+
+				if (formType == 1) {
+					formContext.getControl("dpms_clinicalreview").removeOption(774460004)
+					formContext.getControl("dpms_clinicalreview").removeOption(774460005)
+					formContext.getControl("dpms_clinicalreview").removeOption(774460006)
+					formContext.getControl("dpms_clinicalreview").removeOption(774460007)
+				}
+
+				if (formType == 2) {
+					formContext.getControl("dpms_clinicalreview").removeOption(774460000)
+					formContext.getControl("dpms_clinicalreview").removeOption(774460001)
+					formContext.getControl("dpms_clinicalreview").removeOption(774460002)
+					formContext.getControl("dpms_clinicalreview").removeOption(774460003)
+				}
+
+			} else {
+
+				if (var_at == null) {
+					triagesection.setVisible(false);
+					initsection.setVisible(false);
+					fusection.setVisible(false);
+					ffsection.setVisible(false);
+					pasection.setVisible(false);
+					inpatient.setVisible(false);
+					ambulatory.setVisible(false);
+					if (formCanBeEdited == 1) formContext.data.entity.save();
+				}
+
+				if (var_at != null) {
+
+					if (var_at == 774460000) { //TRIAGE
+						triagesection.setVisible(true);
+						initsection.setVisible(false);
+						fusection.setVisible(false);
+						ffsection.setVisible(false);
+						pasection.setVisible(false);
+						inpatient.setVisible(false);
+						ambulatory.setVisible(false);
+
+						if (formCanBeEdited == 1) {
+							formContext.getAttribute("dpms_cough").setRequiredLevel("required");
+							formContext.getAttribute("dpms_chestpain").setRequiredLevel("required");
+							formContext.getAttribute("dpms_fever").setRequiredLevel("required");
+							formContext.getAttribute("dpms_shortnessofbreath").setRequiredLevel("required");
+							formContext.getAttribute("dpms_homeoxygen").setRequiredLevel("required");
+						}
+					}
+					else if (var_at == 774460001) { //Telephone Clinical Assessment
+						triagesection.setVisible(false);
+						initsection.setVisible(true);
+						fusection.setVisible(false);
+						ffsection.setVisible(false);
+						pasection.setVisible(false);
+						inpatient.setVisible(false);
+						ambulatory.setVisible(false);
+
+						if (formCanBeEdited == 1) {
+							formContext.getAttribute("dpms_cough").setRequiredLevel("required");
+							formContext.getAttribute("dpms_chestpain").setRequiredLevel("required");
+							formContext.getAttribute("dpms_fever").setRequiredLevel("required");
+							formContext.getAttribute("dpms_shortnessofbreath").setRequiredLevel("required");
+							formContext.getAttribute("dpms_homeoxygen").setRequiredLevel("required");
+
+							formContext.getAttribute("dpms_consciousness").setRequiredLevel("required");
+							formContext.getAttribute("dpms_abdominalpain").setRequiredLevel("required");
+							formContext.getAttribute("dpms_diarrhoea").setRequiredLevel("required");
+							formContext.getAttribute("dpms_dizziness").setRequiredLevel("required");
+							formContext.getAttribute("dpms_fatigue").setRequiredLevel("required");
+							formContext.getAttribute("dpms_haemoptysis").setRequiredLevel("required");
+							formContext.getAttribute("dpms_headache").setRequiredLevel("required");
+							formContext.getAttribute("dpms_lossofappetite").setRequiredLevel("required");
+							formContext.getAttribute("dpms_myalgia").setRequiredLevel("required");
+							formContext.getAttribute("dpms_nauseavomiting").setRequiredLevel("required");
+							formContext.getAttribute("dpms_rhinorrhea").setRequiredLevel("required");
+							formContext.getAttribute("dpms_sorethroat").setRequiredLevel("required");
+							formContext.getAttribute("dpms_sputumproduction").setRequiredLevel("required");
+							formContext.getAttribute("dpms_aretheresignificantriskfactors").setRequiredLevel("required");
+							formContext.getAttribute("dpms_telephoneassessmentoutcome").setRequiredLevel("required");
+						}
+
+					}
+					else if (var_at == 774460002) { //FOLLOW UP ASSESSMENT
+						triagesection.setVisible(false);
+						initsection.setVisible(false);
+						fusection.setVisible(true);
+						ffsection.setVisible(false);
+						pasection.setVisible(false);
+						inpatient.setVisible(false);
+						ambulatory.setVisible(false);
+
+						if (formCanBeEdited == 1) {
+							formContext.getAttribute("dpms_cough").setRequiredLevel("required");
+							formContext.getAttribute("dpms_chestpain").setRequiredLevel("required");
+							formContext.getAttribute("dpms_fever").setRequiredLevel("required");
+							formContext.getAttribute("dpms_shortnessofbreath").setRequiredLevel("required");
+							formContext.getAttribute("dpms_homeoxygen").setRequiredLevel("required");
+
+							formContext.getAttribute("dpms_consciousness").setRequiredLevel("required");
+							formContext.getAttribute("dpms_abdominalpain").setRequiredLevel("required");
+							formContext.getAttribute("dpms_diarrhoea").setRequiredLevel("required");
+							formContext.getAttribute("dpms_dizziness").setRequiredLevel("required");
+							formContext.getAttribute("dpms_fatigue").setRequiredLevel("required");
+							formContext.getAttribute("dpms_haemoptysis").setRequiredLevel("required");
+							formContext.getAttribute("dpms_headache").setRequiredLevel("required");
+							formContext.getAttribute("dpms_lossofappetite").setRequiredLevel("required");
+							formContext.getAttribute("dpms_myalgia").setRequiredLevel("required");
+							formContext.getAttribute("dpms_nauseavomiting").setRequiredLevel("required");
+							formContext.getAttribute("dpms_rhinorrhea").setRequiredLevel("required");
+							formContext.getAttribute("dpms_sorethroat").setRequiredLevel("required");
+							formContext.getAttribute("dpms_sputumproduction").setRequiredLevel("required");
+							formContext.getAttribute("dpms_aretheresignificantriskfactors").setRequiredLevel("required");
+							formContext.getAttribute("dpms_telephoneassessmentoutcome").setRequiredLevel("required");
+						}
+					}
+					else if (var_at == 774460003) { // HOME ASSESSMENT
+						triagesection.setVisible(false);
+						initsection.setVisible(false);
+						fusection.setVisible(false);
+						ffsection.setVisible(true);
+						pasection.setVisible(false);
+						inpatient.setVisible(false);
+						ambulatory.setVisible(false);
+					}
+					else if (var_at == 774460004) { // HUB ASSESSMENT
+						triagesection.setVisible(false);
+						initsection.setVisible(false);
+						fusection.setVisible(false);
+						ffsection.setVisible(true);
+						pasection.setVisible(false);
+						inpatient.setVisible(false);
+						ambulatory.setVisible(false);
+					}
+					else if (var_at == 774460005) { // POSITIVE PATIENT ASSESSMENT
+						triagesection.setVisible(false);
+						initsection.setVisible(false);
+						fusection.setVisible(false);
+						ffsection.setVisible(false);
+						pasection.setVisible(true);
+						inpatient.setVisible(false);
+						ambulatory.setVisible(false);
+						formContext.getAttribute("dpms_positiveassessmentoutcome").setRequiredLevel("required");
+
+					}
+					else if (var_at == 774460006) { // INPATIENT OBSERVATION
+						triagesection.setVisible(false);
+						initsection.setVisible(false);
+						fusection.setVisible(false);
+						ffsection.setVisible(false);
+						pasection.setVisible(false);
+						inpatient.setVisible(true);
+						ambulatory.setVisible(false);
+					}
+					else if (var_at == 774460007) { // AMBULATORY ASSESSMENT
+						triagesection.setVisible(false);
+						initsection.setVisible(false);
+						fusection.setVisible(false);
+						ffsection.setVisible(false);
+						pasection.setVisible(false);
+						inpatient.setVisible(false);
+						ambulatory.setVisible(true);
+						formContext.getAttribute("dpms_ambulatoryassessmentoutcome").setRequiredLevel("required");
+						formContext.getAttribute("dpms_respirationrate").setRequiredLevel("required");
+						formContext.getAttribute("dpms_oxygensaturations").setRequiredLevel("required");
+						formContext.getAttribute("dpms_systolicbloodpressure").setRequiredLevel("required");
+						formContext.getAttribute("dpms_diastolicbloodpressure").setRequiredLevel("required");
+						formContext.getAttribute("dpms_heartrate").setRequiredLevel("required");
+
+						formContext.getAttribute("dpms_acvpucnsresponse").setRequiredLevel("required");
+						formContext.getAttribute("dpms_temperature").setRequiredLevel("required");
+
+
+					}
+				}
+			}	
+		},
+		function (error) {
+			console.log(error.message);
+		});
+
 
 	//alert(var_at);
 
-	if (var_at == null) {
-		triagesection.setVisible(false);
-		initsection.setVisible(false);
-		fusection.setVisible(false);
-		ffsection.setVisible(false);
-		pasection.setVisible(false);
-		inpatient.setVisible(false);
-		ambulatory.setVisible(false);
-		if (formCanBeEdited == 1) formContext.data.entity.save();
-	}
+	if (isCareFacilityForm == 1) {
 
-	if (var_at != null) {
+		
+	} else {
 
 
-		if (var_at == 774460000) { //TRIAGE
-			triagesection.setVisible(true);
-			initsection.setVisible(false);
-			fusection.setVisible(false);
-			ffsection.setVisible(false);
-			pasection.setVisible(false);
-			inpatient.setVisible(false);
-			ambulatory.setVisible(false);
-
-			if (formCanBeEdited == 1) {
-				formContext.getAttribute("dpms_cough").setRequiredLevel("required");
-				formContext.getAttribute("dpms_chestpain").setRequiredLevel("required");
-				formContext.getAttribute("dpms_fever").setRequiredLevel("required");
-				formContext.getAttribute("dpms_shortnessofbreath").setRequiredLevel("required");
-				formContext.getAttribute("dpms_homeoxygen").setRequiredLevel("required");
-			}
-		}
-		else if (var_at == 774460001) { //Telephone Clinical Assessment
-			triagesection.setVisible(false);
-			initsection.setVisible(true);
-			fusection.setVisible(false);
-			ffsection.setVisible(false);
-			pasection.setVisible(false);
-			inpatient.setVisible(false);
-			ambulatory.setVisible(false);
-
-			if (formCanBeEdited == 1) {
-				formContext.getAttribute("dpms_cough").setRequiredLevel("required");
-				formContext.getAttribute("dpms_chestpain").setRequiredLevel("required");
-				formContext.getAttribute("dpms_fever").setRequiredLevel("required");
-				formContext.getAttribute("dpms_shortnessofbreath").setRequiredLevel("required");
-				formContext.getAttribute("dpms_homeoxygen").setRequiredLevel("required");
-
-				formContext.getAttribute("dpms_consciousness").setRequiredLevel("required");
-				formContext.getAttribute("dpms_abdominalpain").setRequiredLevel("required");
-				formContext.getAttribute("dpms_diarrhoea").setRequiredLevel("required");
-				formContext.getAttribute("dpms_dizziness").setRequiredLevel("required");
-				formContext.getAttribute("dpms_fatigue").setRequiredLevel("required");
-				formContext.getAttribute("dpms_haemoptysis").setRequiredLevel("required");
-				formContext.getAttribute("dpms_headache").setRequiredLevel("required");
-				formContext.getAttribute("dpms_lossofappetite").setRequiredLevel("required");
-				formContext.getAttribute("dpms_myalgia").setRequiredLevel("required");
-				formContext.getAttribute("dpms_nauseavomiting").setRequiredLevel("required");
-				formContext.getAttribute("dpms_rhinorrhea").setRequiredLevel("required");
-				formContext.getAttribute("dpms_sorethroat").setRequiredLevel("required");
-				formContext.getAttribute("dpms_sputumproduction").setRequiredLevel("required");
-				formContext.getAttribute("dpms_aretheresignificantriskfactors").setRequiredLevel("required");
-				formContext.getAttribute("dpms_telephoneassessmentoutcome").setRequiredLevel("required");
-			}
-
-		}
-		else if (var_at == 774460002) { //FOLLOW UP ASSESSMENT
-			triagesection.setVisible(false);
-			initsection.setVisible(false);
-			fusection.setVisible(true);
-			ffsection.setVisible(false);
-			pasection.setVisible(false);
-			inpatient.setVisible(false);
-			ambulatory.setVisible(false);
-
-			if (formCanBeEdited == 1) {
-				formContext.getAttribute("dpms_cough").setRequiredLevel("required");
-				formContext.getAttribute("dpms_chestpain").setRequiredLevel("required");
-				formContext.getAttribute("dpms_fever").setRequiredLevel("required");
-				formContext.getAttribute("dpms_shortnessofbreath").setRequiredLevel("required");
-				formContext.getAttribute("dpms_homeoxygen").setRequiredLevel("required");
-
-				formContext.getAttribute("dpms_consciousness").setRequiredLevel("required");
-				formContext.getAttribute("dpms_abdominalpain").setRequiredLevel("required");
-				formContext.getAttribute("dpms_diarrhoea").setRequiredLevel("required");
-				formContext.getAttribute("dpms_dizziness").setRequiredLevel("required");
-				formContext.getAttribute("dpms_fatigue").setRequiredLevel("required");
-				formContext.getAttribute("dpms_haemoptysis").setRequiredLevel("required");
-				formContext.getAttribute("dpms_headache").setRequiredLevel("required");
-				formContext.getAttribute("dpms_lossofappetite").setRequiredLevel("required");
-				formContext.getAttribute("dpms_myalgia").setRequiredLevel("required");
-				formContext.getAttribute("dpms_nauseavomiting").setRequiredLevel("required");
-				formContext.getAttribute("dpms_rhinorrhea").setRequiredLevel("required");
-				formContext.getAttribute("dpms_sorethroat").setRequiredLevel("required");
-				formContext.getAttribute("dpms_sputumproduction").setRequiredLevel("required");
-				formContext.getAttribute("dpms_aretheresignificantriskfactors").setRequiredLevel("required");
-				formContext.getAttribute("dpms_telephoneassessmentoutcome").setRequiredLevel("required");
-			}
-		}
-		else if (var_at == 774460003) { // HOME ASSESSMENT
-			triagesection.setVisible(false);
-			initsection.setVisible(false);
-			fusection.setVisible(false);
-			ffsection.setVisible(true);
-			pasection.setVisible(false);
-			inpatient.setVisible(false);
-			ambulatory.setVisible(false);
-		}
-		else if (var_at == 774460004) { // HUB ASSESSMENT
-			triagesection.setVisible(false);
-			initsection.setVisible(false);
-			fusection.setVisible(false);
-			ffsection.setVisible(true);
-			pasection.setVisible(false);
-			inpatient.setVisible(false);
-			ambulatory.setVisible(false);
-		}
-		else if (var_at == 774460005) { // POSITIVE PATIENT ASSESSMENT
-			triagesection.setVisible(false);
-			initsection.setVisible(false);
-			fusection.setVisible(false);
-			ffsection.setVisible(false);
-			pasection.setVisible(true);
-			inpatient.setVisible(false);
-			ambulatory.setVisible(false);
-			formContext.getAttribute("dpms_positiveassessmentoutcome").setRequiredLevel("required");
-
-		}
-		else if (var_at == 774460006) { // INPATIENT OBSERVATION
-			triagesection.setVisible(false);
-			initsection.setVisible(false);
-			fusection.setVisible(false);
-			ffsection.setVisible(false);
-			pasection.setVisible(false);
-			inpatient.setVisible(true);
-			ambulatory.setVisible(false);
-		}
-		else if (var_at == 774460007) { // AMBULATORY ASSESSMENT
-			triagesection.setVisible(false);
-			initsection.setVisible(false);
-			fusection.setVisible(false);
-			ffsection.setVisible(false);
-			pasection.setVisible(false);
-			inpatient.setVisible(false);
-			ambulatory.setVisible(true);
-			formContext.getAttribute("dpms_ambulatoryassessmentoutcome").setRequiredLevel("required");
-			formContext.getAttribute("dpms_respirationrate").setRequiredLevel("required");
-			formContext.getAttribute("dpms_oxygensaturations").setRequiredLevel("required");
-			formContext.getAttribute("dpms_systolicbloodpressure").setRequiredLevel("required");
-			formContext.getAttribute("dpms_diastolicbloodpressure").setRequiredLevel("required");
-			formContext.getAttribute("dpms_heartrate").setRequiredLevel("required");
-
-			formContext.getAttribute("dpms_acvpucnsresponse").setRequiredLevel("required");
-			formContext.getAttribute("dpms_temperature").setRequiredLevel("required");
-
-
-		}
-	}
-
+	} 
 }
 
 function doLastNameUpperCase() {
@@ -351,9 +403,9 @@ function setinewsScore(executionContext) {
 			formContext.getAttribute("dpms_inewsscore").setValue(inewsScore);
 			formContext.getAttribute("dpms_inewsscore").setSubmitMode("always");
 		}
-
-
 	}
+	
+	formContext.getAttribute("dpms_inewsscore").fireOnChange();
 }
 
 function GenerateiNEWSScore(formContext) {
@@ -439,31 +491,112 @@ function GenerateBMI(executionContext) {
 
 // ------------------- Care Facility app -----------------------
 
-function onFormLoadRemoveOptions(executionContext) {
-    var formContext = executionContext.getFormContext();
-
-    formContext.getAttribute("dpms_assessmenttype").setValue(774460006)
-    var tabObj = formContext.ui.tabs.get("general");
-    var inpatient = tabObj.sections.get("inpatient_observation").setVisible(true);
+// function onFormLoadRemoveOptions(executionContext) {
+// 	debugger;
+//     var formContext = executionContext.getFormContext();
+// 	var formType = formContext.ui.getFormType();
+//     var tabObj = formContext.ui.tabs.get("general");
+//     var inpatient = tabObj.sections.get("inpatient_observation").setVisible(true);
     
-    formContext.getControl("dpms_assessmenttype").removeOption(774460000)
-    formContext.getControl("dpms_assessmenttype").removeOption(774460001)
-    formContext.getControl("dpms_assessmenttype").removeOption(774460005)
-    formContext.getControl("dpms_assessmenttype").removeOption(774460007)
+//     formContext.getAttribute("dpms_assessmenttype").setValue(774460006)
 
+//     formContext.getControl("dpms_assessmenttype").removeOption(774460000)
+//     formContext.getControl("dpms_assessmenttype").removeOption(774460001)
+//     formContext.getControl("dpms_assessmenttype").removeOption(774460005)
+//     formContext.getControl("dpms_assessmenttype").removeOption(774460007)
+
+// 	if (formType == 1) {
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460004)
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460005)
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460006)
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460007)
+// 	}
+
+// 	if (formType == 2) {
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460000)
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460001)
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460002)
+// 		formContext.getControl("dpms_clinicalreview").removeOption(774460003)
+// 	}
+
+// }
+
+// function ShowHideSectionsCareFacility(executionContext) {
+// 	debugger;
+//     var formContext = executionContext.getFormContext();
+//     var tabObj = formContext.ui.tabs.get("general");
+//     var inpatient = tabObj.sections.get("inpatient_observation");
+//     var var_at = formContext.getAttribute("dpms_assessmenttype").getValue();
+//     var formType = formContext.ui.getFormType();
+//     var formCanBeEdited = 0;
+// 	if (formType == 1 || formType == 2) formCanBeEdited = 1;
+
+//     if (var_at == 774460006) {
+//         inpatient.setVisible(true);
+//     }
+//     if (formCanBeEdited == 1) formContext.data.entity.save();
+// }
+
+function CalculateNextObservationDue(executionContext) {
+	debugger;
+	var formContext = executionContext.getFormContext();
+
+	var inewsScore = formContext.getAttribute("dpms_inewsscore").getValue();
+	var heartRate = formContext.getAttribute("dpms_heartrate").getValue();
+	var newObservationDue = formContext.getAttribute("dpms_nextobservationsdue")
+
+	if ((inewsScore == 0 || inewsScore == 1) && heartRate > 40) {
+		newObservationDue.setValue(774460000)
+	}
+	if (inewsScore == 2 && heartRate > 40) {
+		newObservationDue.setValue(774460001)
+	}
+	if (inewsScore == 3 && heartRate > 40) {
+		newObservationDue.setValue(774460002)
+	}
+	if ((inewsScore >= 4 && inewsScore <= 6) && heartRate > 40) {
+		newObservationDue.setValue(774460003)
+	}
+	if (inewsScore >= 7 || heartRate <= 40) {
+		newObservationDue.setValue(774460004)
+	}
 }
 
-function ShowHideSectionsCareFacility(executionContext) {
-    var formContext = executionContext.getFormContext();
-    var tabObj = formContext.ui.tabs.get("general");
-    var inpatient = tabObj.sections.get("inpatient_observation");
-    var var_at = formContext.getAttribute("dpms_assessmenttype").getValue();
-    var formType = formContext.ui.getFormType();
-    var formCanBeEdited = 0;
-	if (formType == 1 || formType == 2) formCanBeEdited = 1;
+function SetClinicalReviewValue(executionContext) {
+	debugger;
+	var formContext = executionContext.getFormContext();
+	var inewsScore = formContext.getAttribute("dpms_inewsscore").getValue();
+	var changeSinceLastInews = formContext.getAttribute("dpms_inewschangesincelastinews").getValue();
 
-    if (var_at == 774460006) {
-        inpatient.setVisible(true);
-    }
-    if (formCanBeEdited == 1) formContext.data.entity.save();
+	if ((inewsScore == 1 && changeSinceLastInews == -1) || (inewsScore == 1 ) || inewsScore == 2) {
+		formContext.getAttribute("dpms_clinicalreview").setValue(774460001);
+	}
+
+	if (inewsScore >= 3 && inewsScore <= 6) {
+		formContext.getAttribute("dpms_clinicalreview").setValue(774460002);
+	}
+
+	if (inewsScore >= 7) {
+		formContext.getAttribute("dpms_clinicalreview").setValue(774460003);
+	}
+ }
+
+function SetChangeInINEWSScore(executionContext) {
+	debugger;
+	var formContext = executionContext.getFormContext();
+	var patientId = formContext.getAttribute("dpms_patient").getValue();
+
+	Xrm.WebApi.retrieveRecord("contact", patientId[0].id, "?$select=dpms_lastassessmentscore").then(
+		function success(result) {
+
+			var inewsScoreFromLastAssessment = result.dpms_lastassessmentscore;
+			var inewsScore = formContext.getAttribute("dpms_inewsscore").getValue();
+			var changeSinceLastInews = inewsScore - inewsScoreFromLastAssessment;
+			formContext.getAttribute("dpms_inewschangesincelastinews").setValue(changeSinceLastInews);
+			
+		},
+		function (error) {
+			console.log(error.message);
+		}
+	);
 }

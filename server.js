@@ -157,6 +157,34 @@ app.get('/:room/start/:currentPlayer', (req, res) => {
 })
 
 app.post('/nextPlayer', (req, res) => {
+  var pot1 = JSON.parse(req.body.pot1)
+  var pot2 = JSON.parse(req.body.pot2)
+  var pot2toSend = req.body.pot2
+  pot2toSend.replace('[', '')
+  pot2toSend.replace(']', '')
+
+  if (pot1.length != 0 && pot2.length != 0)
+    if (pot1.length == 0) {
+      pot1 = pot2
+      pot2 = []
+
+      db.collection('rooms').findOneAndUpdate({room: req.body.room}, {$set: { pot1: pot1, pot2: pot2 }}, {returnOriginal:false}, (err, room) => {
+        if (err) {
+          console.log(err)
+        } else {
+          console.log("Updated" + room)
+        }
+      })
+    } else {
+      db.collection('rooms').findOneAndUpdate({room: req.body.room}, {$set: { pot1: pot1 }, $push: { pot2: pot2 }}, {returnOriginal:false}, (err, room) => {
+        if (err) {
+          console.log(err)
+        } else {
+          console.log("Updated" + room)
+        }
+      })
+    }
+
   res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
 })
 
@@ -171,11 +199,17 @@ io.on('connection', socket => {
   })
 
   socket.on('start-timer', room => {
-    var pot1 = getPot1(room)
-    socket.emit('show-pot', pot1)
+    getPot1(room, function(err, room) {
+      if (err) {
+        console.log(err)
+      } else {
+        socket.emit('show-pot', room.pot1)
+      }
+    })
+
     var counter = 5;
     var WinnerCountdown = setInterval(function(){
-      io.emit('counter', { counter: counter, pot1: pot1 });
+      io.emit('counter', counter);
       counter--
       if (counter === 0) {
         clearInterval(WinnerCountdown);
@@ -183,12 +217,6 @@ io.on('connection', socket => {
     }, 1000);
   })
 
-  // socket.on('disconnect', () => {
-  //   getUserRooms(socket).forEach(room => {
-  //     socket.to(room).broadcast.emit('user-disconnected', rooms[room].users[socket.id])
-  //     delete rooms[room].users[socket.id]
-  //   })
-  // })
 })
 
 function newPlayer(player) {
@@ -235,9 +263,12 @@ function assignTeam(player) {
     }   
 }
 
-function getPot1(room) {
+function getPot1(room, callback) {
   db.collection('rooms').findOne({ room: room }, function (err, room) {
-    console.log(room)
-    return room.pot1
+    if (err) {
+      callback(err, null)
+    } else {
+      callback(null, room)
+    }
   });
 }
