@@ -11,7 +11,8 @@ const blueTeamContainer = document.getElementById('blueTeam')
 const startGameButton = document.getElementById('startGame')
 var potArray1 = []
 var potArray2 = []
-
+var redTeamScore = 0
+var blueTeamScore = 0
 
 $("#fourWords").submit(function(e) {
 
@@ -88,6 +89,20 @@ socket.on('counter', count => {
     myForm.appendChild(pot2Input);
     document.body.appendChild(myForm);
 
+    var redTeamScoreInput = document.createElement('input');
+    redTeamScoreInput.setAttribute('type', 'number');
+    redTeamScoreInput.setAttribute('name', 'redTeamScore');
+    redTeamScoreInput.setAttribute('value', redTeamScore);
+    myForm.appendChild(redTeamScoreInput);
+    document.body.appendChild(myForm);
+
+    var blueTeamScoreInput = document.createElement('input');
+    blueTeamScoreInput.setAttribute('type', 'number');
+    blueTeamScoreInput.setAttribute('name', 'blueTeamScore');
+    blueTeamScoreInput.setAttribute('value', blueTeamScore);
+    myForm.appendChild(blueTeamScoreInput);
+    document.body.appendChild(myForm);
+
     myForm.submit();
   }
 })
@@ -101,19 +116,13 @@ socket.on('start-game', room => {
   window.location = url
 })
 
-socket.on('show-pot', pot1 => {
-  potArray1 = pot1
+socket.on('show-pot', data => {
+  potArray1 = data.pot1
+  potArray2 = data.pot2
   var firstWord = potArray1[Math.floor(Math.random() * potArray1.length)]
   document.getElementById('word').innerHTML = firstWord
   $('#nextButton').show()
 })
-
-// function appendPlayer(player) {
-//   const playerElement = document.createElement('div')
-//   playerElement.innerText = player
-//   playerContainer.append(playerElement)
-// }
-
 
 function closeModal() {
   const myModal = document.getElementById('myModal')
@@ -139,6 +148,13 @@ function nextWord() {
     potArray1.splice(i, 1);
     potArray2.push(wordToRemove)
   }
+
+  if (potArray1.length == 0) {
+    potArray1 = potArray2
+    potArray2 = []
+  }
+
+  currentPlayer % 2 == 1 ? redTeamScore ++ : blueTeamScore ++
 
   var word = potArray1[Math.floor(Math.random() * potArray1.length)]
   document.getElementById('word').innerHTML = word

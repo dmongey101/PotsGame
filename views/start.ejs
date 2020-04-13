@@ -18,7 +18,7 @@
 
   <div class="row">
     <div class="col">
-      <h3 class="d-flex justify-content-center">Red Team</h3>
+      <h3 class="d-flex justify-content-center">Red Team  -  <%= redTeamScore %></h3>
       <% players.forEach(player => { %>
         <div class="row">
           <div class="col d-flex justify-content-center">
@@ -30,7 +30,7 @@
       <% }) %>
       </div>
       <div class="col">
-        <h3 class="d-flex justify-content-center">Blue Team</h3>
+        <h3 class="d-flex justify-content-center">Blue Team  -  <%= blueTeamScore %></h3>
         <% players.forEach(player => { %>
           <div class="row">
             <div class="col d-flex justify-content-center">

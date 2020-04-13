@@ -102,7 +102,7 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
     team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
     room: req.body.room
   }
-  rooms[req.body.room] = { noOfPlayers: req.body.noOfPlayers, players: [player], pot1: [], pot2: [] }
+  rooms[req.body.room] = { noOfPlayers: req.body.noOfPlayers, redTeamScore: 0, blueTeamScore: 0, players: [player], pot1: [], pot2: [] }
   assignTeam(player)
   res.redirect(req.body.room)
   // Send message that new room was created
@@ -134,7 +134,7 @@ app.post('/fourWords', (req, res) => {
   })
   if (rooms[req.body.room].noOfPlayers * 4 == rooms[req.body.room].pot1.length) {
       var players = redTeam.concat(blueTeam)
-      var dbRoom = { 'room': req.body.room, 'noOfPlayers': rooms[req.body.room].noOfPlayers, 'players': players, pot1: rooms[req.body.room].pot1, pot2: [] }
+      var dbRoom = { 'room': req.body.room, 'noOfPlayers': rooms[req.body.room].noOfPlayers, redTeamScore: 0, blueTeamScore: 0, 'players': players, pot1: rooms[req.body.room].pot1, pot2: [] }
       db.collection('rooms').insertOne(dbRoom, (err, result) => {
         if (err) return console.log(err)
 
@@ -151,32 +151,20 @@ app.get('/:room/start/:currentPlayer', (req, res) => {
      if (currentPlayer > room.noOfPlayers) {
        currentPlayer = 1
      }
+
      var user = req.session.passport.username
-     res.render('start', { players: players, currentPlayer: currentPlayer, user: user, room: room.room })
+     res.render('start', { players: players, currentPlayer: currentPlayer, user: user, room: room.room, redTeamScore: room.redTeamScore, blueTeamScore: room.blueTeamScore })
   });
 })
 
 app.post('/nextPlayer', (req, res) => {
   var pot1 = JSON.parse(req.body.pot1)
   var pot2 = JSON.parse(req.body.pot2)
-  var pot2toSend = req.body.pot2
-  pot2toSend.replace('[', '')
-  pot2toSend.replace(']', '')
+  var redTeamScore = parseInt(req.body.redTeamScore)
+  var blueTeamScore = parseInt(req.body.blueTeamScore)
 
-  if (pot1.length != 0 && pot2.length != 0)
-    if (pot1.length == 0) {
-      pot1 = pot2
-      pot2 = []
-
-      db.collection('rooms').findOneAndUpdate({room: req.body.room}, {$set: { pot1: pot1, pot2: pot2 }}, {returnOriginal:false}, (err, room) => {
-        if (err) {
-          console.log(err)
-        } else {
-          console.log("Updated" + room)
-        }
-      })
-    } else {
-      db.collection('rooms').findOneAndUpdate({room: req.body.room}, {$set: { pot1: pot1 }, $push: { pot2: pot2 }}, {returnOriginal:false}, (err, room) => {
+  if (pot1.length != 0 && pot2.length != 0) {
+      db.collection('rooms').findOneAndUpdate({room: req.body.room}, { $set: { pot1: pot1, pot2: pot2 }, $inc: { redTeamScore: redTeamScore, blueTeamScore: blueTeamScore }}, {returnOriginal:false}, (err, room) => {
         if (err) {
           console.log(err)
         } else {
@@ -184,7 +172,6 @@ app.post('/nextPlayer', (req, res) => {
         }
       })
     }
-
   res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
 })
 
@@ -203,7 +190,7 @@ io.on('connection', socket => {
       if (err) {
         console.log(err)
       } else {
-        socket.emit('show-pot', room.pot1)
+        socket.emit('show-pot', { pot1: room.pot1, pot2: room.pot2 })
       }
     })
 
