@@ -34,13 +34,37 @@ $("#fourWords").submit(function(e) {
 
 
 socket.on('room-created', room => {
+  var team = (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue';
   const roomElement = document.createElement('div')
   roomElement.innerText = room
-  const roomLink = document.createElement('a')
-  roomLink.href = `/${room}`
-  roomLink.innerText = 'join'
   roomContainer.append(roomElement)
-  roomContainer.append(roomLink)
+
+  var playerForm = document.createElement('form');
+  playerForm.setAttribute('action', '/player');
+  playerForm.setAttribute('method', 'post');
+
+  var roomInput = document.createElement('input');
+  roomInput.setAttribute('type', 'hidden');
+  roomInput.setAttribute('name', 'room');
+  roomInput.setAttribute('value', room);
+  playerForm.appendChild(roomInput);
+  document.body.appendChild(playerForm);
+
+  var teamInput = document.createElement('input');
+  teamInput.setAttribute('type', 'hidden');
+  teamInput.setAttribute('name', 'team');
+  teamInput.setAttribute('value', team);
+  playerForm.appendChild(teamInput);
+  document.body.appendChild(playerForm);
+
+  var button = document.createElement('button');
+  button.setAttribute('class', 'btn btn-primary')
+  button.setAttribute('type', 'submit')
+  button.innerHTML = 'Join'
+  playerForm.appendChild(button)
+  document.body.appendChild(playerForm)
+
+  roomElement.append(playerForm)
 })
 
 socket.on('player-created', player => {
@@ -53,58 +77,142 @@ socket.on('chat-message', data => {
 
 socket.on('counter', count => {
   document.getElementById("countdown").innerHTML = count
-  if (count===1) {
-    currentPlayer ++
+  if (count===0) {
+    
+    if (timeout == true) {
+        var counter = 2;
+        var clock = setInterval(function(){
+        counter--
+        if (counter === 0) {
+          clearInterval(clock);
+          currentPlayer ++
+          var myForm = document.createElement('form');
+          myForm.setAttribute('action', '/nextPlayer');
+          myForm.setAttribute('method', 'post');
+          myForm.setAttribute('hidden', 'true');
 
-    var myForm = document.createElement('form');
-    myForm.setAttribute('action', '/nextPlayer');
-    myForm.setAttribute('method', 'post');
-    myForm.setAttribute('hidden', 'true');
+          var currentPlayerInput = document.createElement('input');
+          currentPlayerInput.setAttribute('type', 'number');
+          currentPlayerInput.setAttribute('name', 'currentPlayer');
+          currentPlayerInput.setAttribute('value', currentPlayer);
+          myForm.appendChild(currentPlayerInput);
+          document.body.appendChild(myForm);
 
-    var currentPlayerInput = document.createElement('input');
-    currentPlayerInput.setAttribute('type', 'number');
-    currentPlayerInput.setAttribute('name', 'currentPlayer');
-    currentPlayerInput.setAttribute('value', currentPlayer);
-    myForm.appendChild(currentPlayerInput);
-    document.body.appendChild(myForm);
+          var roomInput = document.createElement('input');
+          roomInput.setAttribute('type', 'text');
+          roomInput.setAttribute('name', 'room');
+          roomInput.setAttribute('value', room);
+          myForm.appendChild(roomInput);
+          document.body.appendChild(myForm);
 
-    var roomInput = document.createElement('input');
-    roomInput.setAttribute('type', 'text');
-    roomInput.setAttribute('name', 'room');
-    roomInput.setAttribute('value', room);
-    myForm.appendChild(roomInput);
-    document.body.appendChild(myForm);
+          var pot1Input = document.createElement('input');
+          pot1Input.setAttribute('type', 'text');
+          pot1Input.setAttribute('name', 'pot1');
+          pot1Input.setAttribute('value', JSON.stringify(potArray1));
+          myForm.appendChild(pot1Input);
+          document.body.appendChild(myForm);
 
-    var pot1Input = document.createElement('input');
-    pot1Input.setAttribute('type', 'text');
-    pot1Input.setAttribute('name', 'pot1');
-    pot1Input.setAttribute('value', JSON.stringify(potArray1));
-    myForm.appendChild(pot1Input);
-    document.body.appendChild(myForm);
+          var pot2Input = document.createElement('input');
+          pot2Input.setAttribute('type', 'text');
+          pot2Input.setAttribute('name', 'pot2');
+          pot2Input.setAttribute('value', JSON.stringify(potArray2));
+          myForm.appendChild(pot2Input);
+          document.body.appendChild(myForm);
 
-    var pot2Input = document.createElement('input');
-    pot2Input.setAttribute('type', 'text');
-    pot2Input.setAttribute('name', 'pot2');
-    pot2Input.setAttribute('value', JSON.stringify(potArray2));
-    myForm.appendChild(pot2Input);
-    document.body.appendChild(myForm);
+          var redTeamScoreInput = document.createElement('input');
+          redTeamScoreInput.setAttribute('type', 'number');
+          redTeamScoreInput.setAttribute('name', 'redTeamScore');
+          redTeamScoreInput.setAttribute('value', redTeamScore);
+          myForm.appendChild(redTeamScoreInput);
+          document.body.appendChild(myForm);
 
-    var redTeamScoreInput = document.createElement('input');
-    redTeamScoreInput.setAttribute('type', 'number');
-    redTeamScoreInput.setAttribute('name', 'redTeamScore');
-    redTeamScoreInput.setAttribute('value', redTeamScore);
-    myForm.appendChild(redTeamScoreInput);
-    document.body.appendChild(myForm);
+          var blueTeamScoreInput = document.createElement('input');
+          blueTeamScoreInput.setAttribute('type', 'number');
+          blueTeamScoreInput.setAttribute('name', 'blueTeamScore');
+          blueTeamScoreInput.setAttribute('value', blueTeamScore);
+          myForm.appendChild(blueTeamScoreInput);
+          document.body.appendChild(myForm);
 
-    var blueTeamScoreInput = document.createElement('input');
-    blueTeamScoreInput.setAttribute('type', 'number');
-    blueTeamScoreInput.setAttribute('name', 'blueTeamScore');
-    blueTeamScoreInput.setAttribute('value', blueTeamScore);
-    myForm.appendChild(blueTeamScoreInput);
-    document.body.appendChild(myForm);
+          myForm.submit();
+            }
+          }, 1000);
+    } else {
+      var totalScore = redTeamScore + blueTeamScore + score
+      var totalWords = potArray1.length + potArray2.length
 
-    myForm.submit();
+      if (totalWords != 0 && totalScore >= totalWords * 4) {
+        var endGameForm = document.createElement('form');
+        endGameForm.setAttribute('action', '/endGame');
+        endGameForm.setAttribute('method', 'post');
+        endGameForm.setAttribute('hidden', 'true');
+
+        var roomInput = document.createElement('input');
+        roomInput.setAttribute('type', 'text');
+        roomInput.setAttribute('name', 'room');
+        roomInput.setAttribute('value', room);
+        endGameForm.appendChild(roomInput);
+        document.body.appendChild(endGameForm);
+
+        endGameForm.submit();
+
+      } else {
+        currentPlayer ++
+        var myForm = document.createElement('form');
+        myForm.setAttribute('action', '/nextPlayer');
+        myForm.setAttribute('method', 'post');
+        myForm.setAttribute('hidden', 'true');
+
+        var currentPlayerInput = document.createElement('input');
+        currentPlayerInput.setAttribute('type', 'number');
+        currentPlayerInput.setAttribute('name', 'currentPlayer');
+        currentPlayerInput.setAttribute('value', currentPlayer);
+        myForm.appendChild(currentPlayerInput);
+        document.body.appendChild(myForm);
+
+        var roomInput = document.createElement('input');
+        roomInput.setAttribute('type', 'text');
+        roomInput.setAttribute('name', 'room');
+        roomInput.setAttribute('value', room);
+        myForm.appendChild(roomInput);
+        document.body.appendChild(myForm);
+
+        var pot1Input = document.createElement('input');
+        pot1Input.setAttribute('type', 'text');
+        pot1Input.setAttribute('name', 'pot1');
+        pot1Input.setAttribute('value', JSON.stringify(potArray1));
+        myForm.appendChild(pot1Input);
+        document.body.appendChild(myForm);
+
+        var pot2Input = document.createElement('input');
+        pot2Input.setAttribute('type', 'text');
+        pot2Input.setAttribute('name', 'pot2');
+        pot2Input.setAttribute('value', JSON.stringify(potArray2));
+        myForm.appendChild(pot2Input);
+        document.body.appendChild(myForm);
+
+        var redTeamScoreInput = document.createElement('input');
+        redTeamScoreInput.setAttribute('type', 'number');
+        redTeamScoreInput.setAttribute('name', 'redTeamScore');
+        redTeamScoreInput.setAttribute('value', redTeamScore);
+        myForm.appendChild(redTeamScoreInput);
+        document.body.appendChild(myForm);
+
+        var blueTeamScoreInput = document.createElement('input');
+        blueTeamScoreInput.setAttribute('type', 'number');
+        blueTeamScoreInput.setAttribute('name', 'blueTeamScore');
+        blueTeamScoreInput.setAttribute('value', blueTeamScore);
+        myForm.appendChild(blueTeamScoreInput);
+        document.body.appendChild(myForm);
+
+        myForm.submit();
+      } 
+    }
   }
+})
+
+socket.on('back-home', () => {
+  var url = 'http://localhost:3000/rooms'
+  window.location = url 
 })
 
 socket.on('user-disconnected', player => {
@@ -124,6 +232,24 @@ socket.on('show-pot', data => {
   $('#nextButton').show()
 })
 
+// socket.on('change-display', () => {
+
+// var totalScore = redTeamScore + blueTeamScore
+// var totalWords = potArray1.length + potArray2.length
+
+// console.log(totalScore)
+// console.log(totalWords)
+//   if (totalScore == totalWords) {
+//     document.body.style.backgroundColor = "blue";
+//   }
+//   if (totalScore == totalWords * 2) {
+//     document.body.style.backgroundColor = "green";
+//   } 
+//   if (totalScore == totalWords * 3) {
+//     document.body.style.backgroundColor = "purple";
+//   }
+// })
+
 function closeModal() {
   const myModal = document.getElementById('myModal')
   const roomModal = document.getElementById('createRoomModal')
@@ -138,6 +264,7 @@ function showRoomForm() {
 
 function startTimer() {
   $("#startButton").hide()
+  timeout = false;
   socket.emit('start-timer', room)
   }
 

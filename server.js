@@ -72,8 +72,8 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
 );
 
   const rooms = {}
-  const redTeam = []
-  const blueTeam = []
+  var redTeam = []
+  var blueTeam = []
 
   app.get('/', (req, res) => {
     res.render('index')
@@ -145,16 +145,20 @@ app.post('/fourWords', (req, res) => {
 })
 app.get('/:room/start/:currentPlayer', (req, res) => {
   db.collection('rooms').findOne({ room: req.params.room }, function (err, room) {
-     var players = room.players
-     var noOfPlayers = parseInt(room.noOfPlayers)
-     var currentPlayer = parseInt(req.params.currentPlayer)
-     if (currentPlayer > room.noOfPlayers) {
-       currentPlayer = 1
-     }
+     if (room == null) {
+       res.redirect('/rooms')
+      } else {
+          var players = room.players
+          var noOfPlayers = parseInt(room.noOfPlayers)
+          var currentPlayer = parseInt(req.params.currentPlayer)
+          if (currentPlayer > room.noOfPlayers) {
+            currentPlayer = 1
+          }
 
-     var user = req.session.passport.username
-     res.render('start', { players: players, currentPlayer: currentPlayer, user: user, room: room.room, redTeamScore: room.redTeamScore, blueTeamScore: room.blueTeamScore })
-  });
+          var user = req.session.passport.username
+          res.render('start', { players: players, currentPlayer: currentPlayer, user: user, room: room.room, redTeamScore: room.redTeamScore, blueTeamScore: room.blueTeamScore })
+        }
+   });
 })
 
 app.post('/nextPlayer', (req, res) => {
@@ -163,7 +167,7 @@ app.post('/nextPlayer', (req, res) => {
   var redTeamScore = parseInt(req.body.redTeamScore)
   var blueTeamScore = parseInt(req.body.blueTeamScore)
 
-  if (pot1.length != 0 && pot2.length != 0) {
+  if (pot1.length != 0) {
       db.collection('rooms').findOneAndUpdate({room: req.body.room}, { $set: { pot1: pot1, pot2: pot2 }, $inc: { redTeamScore: redTeamScore, blueTeamScore: blueTeamScore }}, {returnOriginal:false}, (err, room) => {
         if (err) {
           console.log(err)
@@ -173,6 +177,15 @@ app.post('/nextPlayer', (req, res) => {
       })
     }
   res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
+})
+
+app.post('/endGame', (req, res) => {
+  db.collection('rooms').deleteOne( { room: req.body.room } )
+  delete rooms[req.body.room]
+  redTeam = []
+  blueTeam = []
+
+  res.redirect('/rooms')
 })
 
 server.listen(3000)
@@ -191,18 +204,23 @@ io.on('connection', socket => {
         console.log(err)
       } else {
         socket.emit('show-pot', { pot1: room.pot1, pot2: room.pot2 })
-      }
+      }    
     })
 
     var counter = 5;
     var WinnerCountdown = setInterval(function(){
       io.emit('counter', counter);
       counter--
-      if (counter === 0) {
+      if (counter === -1) {
         clearInterval(WinnerCountdown);
       }
     }, 1000);
   })
+
+  // socket.on('change-round', () => {
+  //   console.log('hello')
+  //   socket.emit('change-display')
+  // })
 
 })
 
@@ -247,7 +265,7 @@ function assignTeam(player) {
       } else {
         redTeam.push(player)
       }
-    }   
+    }
 }
 
 function getPot1(room, callback) {
