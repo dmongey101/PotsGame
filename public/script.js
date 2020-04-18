@@ -245,6 +245,7 @@ socket.on('show-pot', data => {
   var firstWord = potArray1[Math.floor(Math.random() * potArray1.length)]
   document.getElementById('word').innerHTML = firstWord
   $('#nextButton').show()
+  var test;
 })
 
 // socket.on('change-display', () => {
