@@ -4,7 +4,8 @@
     "description": "my first socket.io app",
     "main": "index.js",
     "scripts": {
-        "devStart": "nodemon server.js"
+        "devStart": "nodemon server.js",
+        "start": "node server.js"
     },
     "dependencies": {
         "body-parser": "^1.19.0",
