@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000')
+const socket = io('https://com-pots.herokuapp.com/')
 const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
 const playerContainer = document.getElementById('player-conatiner')
@@ -226,7 +226,7 @@ socket.on('counter', count => {
 })
 
 socket.on('back-home', () => {
-  var url = 'http://localhost:3000/rooms'
+  var url = 'https://com-pots.herokuapp.com/rooms'
   window.location = url 
 })
 
@@ -235,7 +235,7 @@ socket.on('user-disconnected', player => {
 })
 
 socket.on('start-game', room => {
-  var url = `http://localhost:3000/${room}/start/1`
+  var url = `https://com-pots.herokuapp.com/${room}/start/1`
   window.location = url
 })
 
