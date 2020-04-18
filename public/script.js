@@ -295,6 +295,11 @@ function nextWord() {
   if (potArray1.length == 0) {
     potArray1 = potArray2
     potArray2 = []
+
+    if(totalScore < potArray1.length) {
+      document.getElementById('round').innerHTML = "Articulate"
+      round = "Charades"
+    }
     if(totalScore == potArray1.length) {
       document.getElementById('round').innerHTML = "Charades"
       round = "Charades"
@@ -308,7 +313,7 @@ function nextWord() {
       round = "One Action"
     }
     if(totalScore == potArray1.length * 4) {
-      document.getElementById('round').innerHTML = "Charades"
+      document.getElementById('round').innerHTML = "Articulate"
       round = "Game Over"
     }
   }
