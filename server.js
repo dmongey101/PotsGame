@@ -8,7 +8,6 @@ const io = require('socket.io')(server)
 const passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var session = require('express-session')
-const { v4: uuidv4 } = require('uuid');
 
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://donal:Fog85nil@ds113799.mlab.com:13799/mongeypotsgame";
