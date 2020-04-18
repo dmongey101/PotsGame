@@ -1,3 +1,4 @@
+var PORT = process.env.PORT || 3000
 const express = require('express')
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser')
@@ -192,7 +193,7 @@ app.post('/endGame', (req, res) => {
   res.redirect('/rooms')
 })
 
-server.listen(3000)
+server.listen(PORT)
 
 io.on('connection', socket => {
   socket.on('new-user', (room, player) => {
