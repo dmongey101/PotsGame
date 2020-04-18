@@ -134,7 +134,7 @@ app.post('/fourWords', (req, res) => {
   })
   if (rooms[req.body.room].noOfPlayers * 4 == rooms[req.body.room].pot1.length) {
       var players = redTeam.concat(blueTeam)
-      var dbRoom = { 'room': req.body.room, 'noOfPlayers': rooms[req.body.room].noOfPlayers, redTeamScore: 0, blueTeamScore: 0, 'players': players, pot1: rooms[req.body.room].pot1, pot2: [] }
+      var dbRoom = { 'room': req.body.room, 'noOfPlayers': rooms[req.body.room].noOfPlayers, currentRound: 'Articulate', redTeamScore: 0, blueTeamScore: 0, 'players': players, pot1: rooms[req.body.room].pot1, pot2: [] }
       db.collection('rooms').insertOne(dbRoom, (err, result) => {
         if (err) return console.log(err)
 
@@ -155,8 +155,9 @@ app.get('/:room/start/:currentPlayer', (req, res) => {
             currentPlayer = 1
           }
 
+          
           var user = req.session.passport.username
-          res.render('start', { players: players, currentPlayer: currentPlayer, user: user, room: room.room, redTeamScore: room.redTeamScore, blueTeamScore: room.blueTeamScore })
+          res.render('start', { players: players, currentPlayer: currentPlayer, currentRound: room.currentRound, user: user, room: room.room, redTeamScore: room.redTeamScore, blueTeamScore: room.blueTeamScore })
         }
    });
 })
@@ -166,17 +167,20 @@ app.post('/nextPlayer', (req, res) => {
   var pot2 = JSON.parse(req.body.pot2)
   var redTeamScore = parseInt(req.body.redTeamScore)
   var blueTeamScore = parseInt(req.body.blueTeamScore)
-
+  console.log(req.body.round)
   if (pot1.length != 0) {
-      db.collection('rooms').findOneAndUpdate({room: req.body.room}, { $set: { pot1: pot1, pot2: pot2 }, $inc: { redTeamScore: redTeamScore, blueTeamScore: blueTeamScore }}, {returnOriginal:false}, (err, room) => {
+      db.collection('rooms').findOneAndUpdate({room: req.body.room}, { $set: { pot1: pot1, pot2: pot2, currentRound: req.body.round }, $inc: { redTeamScore: redTeamScore, blueTeamScore: blueTeamScore }}, {returnOriginal:false}, (err, room) => {
         if (err) {
           console.log(err)
         } else {
           console.log("Updated" + room)
+          res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
         }
       })
+    } else {
+      res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
     }
-  res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
+  
 })
 
 app.post('/endGame', (req, res) => {

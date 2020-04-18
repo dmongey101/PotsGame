@@ -13,6 +13,7 @@ var potArray1 = []
 var potArray2 = []
 var redTeamScore = 0
 var blueTeamScore = 0
+var round
 
 $("#fourWords").submit(function(e) {
 
@@ -133,6 +134,13 @@ socket.on('counter', count => {
           myForm.appendChild(blueTeamScoreInput);
           document.body.appendChild(myForm);
 
+          var roundInput = document.createElement('input');
+          roundInput.setAttribute('type', 'text');
+          roundInput.setAttribute('name', 'round');
+          roundInput.setAttribute('value', round);
+          myForm.appendChild(roundInput);
+          document.body.appendChild(myForm);
+
           myForm.submit();
             }
           }, 1000);
@@ -204,6 +212,13 @@ socket.on('counter', count => {
         myForm.appendChild(blueTeamScoreInput);
         document.body.appendChild(myForm);
 
+         var roundInput = document.createElement('input');
+        roundInput.setAttribute('type', 'text');
+        roundInput.setAttribute('name', 'round');
+        roundInput.setAttribute('value', round);
+        myForm.appendChild(roundInput);
+        document.body.appendChild(myForm);
+
         myForm.submit();
       } 
     }
@@ -270,6 +285,7 @@ function startTimer() {
 
 function nextWord() {
   var wordToRemove = $('#word').html()
+  var totalScore = (redTeamScore + blueTeamScore + score) + 1
   var i = potArray1.indexOf(wordToRemove)
   if (i > -1) {
     potArray1.splice(i, 1);
@@ -279,6 +295,22 @@ function nextWord() {
   if (potArray1.length == 0) {
     potArray1 = potArray2
     potArray2 = []
+    if(totalScore == potArray1.length) {
+      document.getElementById('round').innerHTML = "Charades"
+      round = "Charades"
+    }
+    if(totalScore == potArray1.length * 2) {
+      document.getElementById('round').innerHTML = "One Word"
+      round = "One Word"
+    }
+    if(totalScore == potArray1.length * 3) {
+      document.getElementById('round').innerHTML = "One Action"
+      round = "One Action"
+    }
+    if(totalScore == potArray1.length * 4) {
+      document.getElementById('round').innerHTML = "Charades"
+      round = "Game Over"
+    }
   }
 
   currentPlayer % 2 == 1 ? redTeamScore ++ : blueTeamScore ++
