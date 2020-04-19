@@ -83,7 +83,7 @@ socket.on('counter', count => {
   if (count===0) {
     
     if (timeout == true) {
-        var counter = 2;
+        var counter = 1;
         var clock = setInterval(function(){
         counter--
         if (counter === 0) {

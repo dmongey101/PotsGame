@@ -220,7 +220,7 @@ io.on('connection', socket => {
       }    
     })
 
-    var counter = 5;
+    var counter = 30;
     var WinnerCountdown = setInterval(function(){
       io.emit('counter', counter);
       counter--
