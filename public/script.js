@@ -15,7 +15,7 @@ var potArray1 = []
 var potArray2 = []
 var redTeamScore = 0
 var blueTeamScore = 0
-var round = "Articulate"
+var round
 
 $("#fourWords").submit(function(e) {
 
@@ -288,6 +288,10 @@ function startTimer() {
 function nextWord() {
   var wordToRemove = $('#word').html()
   var totalScore = (redTeamScore + blueTeamScore + score) + 1
+
+  if(totalScore < potArray1.length) {
+  round = "Articulate"
+  }
   var i = potArray1.indexOf(wordToRemove)
   if (i > -1) {
     potArray1.splice(i, 1);
