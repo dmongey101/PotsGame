@@ -1,4 +1,6 @@
-const socket = io('https://com-pots.herokuapp.com')
+// const url = 'https://com-pots.herokuapp.com/'
+const url = 'http://localhost:3000'
+const socket = io(url)
 const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
 const playerContainer = document.getElementById('player-conatiner')
@@ -13,7 +15,7 @@ var potArray1 = []
 var potArray2 = []
 var redTeamScore = 0
 var blueTeamScore = 0
-var round
+var round = "Articulate"
 
 $("#fourWords").submit(function(e) {
 
@@ -226,7 +228,7 @@ socket.on('counter', count => {
 })
 
 socket.on('back-home', () => {
-  var url = 'https://com-pots.herokuapp.com/rooms'
+  var url = `${url}/rooms`
   window.location = url 
 })
 
@@ -235,8 +237,8 @@ socket.on('user-disconnected', player => {
 })
 
 socket.on('start-game', room => {
-  var url = `https://com-pots.herokuapp.com/${room}/start/1`
-  window.location = url
+  var gameURL = `${url}/${room}/start/1`
+  window.location = gameURL
 })
 
 socket.on('show-pot', data => {
@@ -245,7 +247,6 @@ socket.on('show-pot', data => {
   var firstWord = potArray1[Math.floor(Math.random() * potArray1.length)]
   document.getElementById('word').innerHTML = firstWord
   $('#nextButton').show()
-  var test;
 })
 
 // socket.on('change-display', () => {

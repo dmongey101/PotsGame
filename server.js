@@ -76,20 +76,29 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
   var blueTeam = []
 
   app.get('/', (req, res) => {
-    res.render('index')
+    console.log(req.session.passport)
+    res.render('index', { user: req.session.passport })
   })
 
   app.post('/signup', (req, res) => {
     db.collection('users').insertOne(req.body, (err, result) => {
-    if (err) return console.log(err)
-
-    console.log('saved to database')
-    res.redirect('/')
+    if (err) {
+      console.log(err)
+    } else {
+      req.login(req.body, function(err) {
+        if(err) {
+          console.log(err)
+        } else {
+          req.session.passport = req.user
+          return res.redirect('/rooms')
+        }
+      })
+    }
    })
   })
 
   app.get('/rooms', (req, res) => {
-    res.render('rooms', { rooms: rooms })
+    res.render('rooms', { rooms: rooms, user: req.session.passport })
   })
 
   app.post('/room', (req, res) => {
@@ -113,7 +122,7 @@ app.get('/:room', (req, res) => {
   if (rooms[req.params.room] == null) {
     return res.redirect('/')
   }
-  res.render('room', { roomName: req.params.room })
+  res.render('room', { roomName: req.params.room, user: req.session.passport })
 })
 
 app.post('/player', (req, res) => {
@@ -211,7 +220,7 @@ io.on('connection', socket => {
       }    
     })
 
-    var counter = 30;
+    var counter = 5;
     var WinnerCountdown = setInterval(function(){
       io.emit('counter', counter);
       counter--
