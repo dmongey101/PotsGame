@@ -76,7 +76,7 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
   var blueTeam = []
 
   app.get('/', (req, res) => {
-    console.log(req.session.passport)
+    console.log(rooms)
     res.render('index', { user: req.session.passport })
   })
 
