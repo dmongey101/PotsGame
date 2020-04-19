@@ -1,4 +1,4 @@
-const url = 'https://com-pots.herokuapp.com/'
+const url = 'https://com-pots.herokuapp.com'
 // const url = 'http://localhost:3000'
 const socket = io(url)
 const messageContainer = document.getElementById('message-container')
@@ -228,8 +228,8 @@ socket.on('counter', count => {
 })
 
 socket.on('back-home', () => {
-  var url = `${url}/rooms`
-  window.location = url 
+  var roomsURL = `${url}/rooms`
+  window.location = roomsURL 
 })
 
 socket.on('user-disconnected', player => {
