@@ -80,20 +80,27 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
   })
 
   app.post('/signup', (req, res) => {
-    db.collection('users').insertOne(req.body, (err, result) => {
-    if (err) {
-      console.log(err)
-    } else {
-      req.login(req.body, function(err) {
-        if(err) {
-          console.log(err)
-        } else {
-          req.session.passport = req.user
-          return res.redirect('/rooms')
-        }
-      })
-    }
-   })
+
+    db.collection('users').findOne({ username: req.body.username }, function(err, user) {
+      if(err) {console.log(err)}
+      if(user) {res.redirect('/')}
+      if(!user) {
+        db.collection('users').insertOne(req.body, (err, result) => {
+          if (err) {
+            console.log(err)
+          } else {
+            req.login(req.body, function(err) {
+              if(err) {
+                console.log(err)
+              } else {
+                req.session.passport = req.user
+                return res.redirect('/rooms')
+              }
+            })
+          }
+        })
+      }
+    })
   })
 
   app.get('/rooms', (req, res) => {
@@ -162,8 +169,6 @@ app.get('/:room/start/:currentPlayer', (req, res) => {
           if (currentPlayer > room.noOfPlayers) {
             currentPlayer = 1
           }
-
-          
           var user = req.session.passport.username
           res.render('start', { players: players, currentPlayer: currentPlayer, currentRound: room.currentRound, user: user, room: room.room, redTeamScore: room.redTeamScore, blueTeamScore: room.blueTeamScore })
         }
