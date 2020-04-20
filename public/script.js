@@ -31,7 +31,7 @@ $("#fourWords").submit(function(e) {
            { 
            }
          });
-    $('#fourWordsModal').hide();;
+    $('#fourWordsModal').hide();
 
 });
 
@@ -147,25 +147,6 @@ socket.on('counter', count => {
             }
           }, 1000);
     } else {
-      var totalScore = redTeamScore + blueTeamScore + score
-      var totalWords = potArray1.length + potArray2.length
-
-      if (totalWords != 0 && totalScore >= totalWords * 4) {
-        var endGameForm = document.createElement('form');
-        endGameForm.setAttribute('action', '/endGame');
-        endGameForm.setAttribute('method', 'post');
-        endGameForm.setAttribute('hidden', 'true');
-
-        var roomInput = document.createElement('input');
-        roomInput.setAttribute('type', 'text');
-        roomInput.setAttribute('name', 'room');
-        roomInput.setAttribute('value', room);
-        endGameForm.appendChild(roomInput);
-        document.body.appendChild(endGameForm);
-
-        endGameForm.submit();
-
-      } else {
         currentPlayer ++
         var myForm = document.createElement('form');
         myForm.setAttribute('action', '/nextPlayer');
@@ -224,16 +205,6 @@ socket.on('counter', count => {
         myForm.submit();
       } 
     }
-  }
-})
-
-socket.on('back-home', () => {
-  var roomsURL = `${url}/rooms`
-  window.location = roomsURL 
-})
-
-socket.on('user-disconnected', player => {
-
 })
 
 socket.on('start-game', room => {
@@ -249,23 +220,10 @@ socket.on('show-pot', data => {
   $('#nextButton').show()
 })
 
-// socket.on('change-display', () => {
-
-// var totalScore = redTeamScore + blueTeamScore
-// var totalWords = potArray1.length + potArray2.length
-
-// console.log(totalScore)
-// console.log(totalWords)
-//   if (totalScore == totalWords) {
-//     document.body.style.backgroundColor = "blue";
-//   }
-//   if (totalScore == totalWords * 2) {
-//     document.body.style.backgroundColor = "green";
-//   } 
-//   if (totalScore == totalWords * 3) {
-//     document.body.style.backgroundColor = "purple";
-//   }
-// })
+socket.on('game-ended', () => {
+  var roomsURL = `${url}/rooms`
+  window.location = roomsURL 
+})
 
 function closeModal() {
   const myModal = document.getElementById('myModal')
@@ -338,5 +296,8 @@ function nextWord() {
 
   var word = potArray1[Math.floor(Math.random() * potArray1.length)]
   document.getElementById('word').innerHTML = word
+}
 
+function endGame() {
+  socket.emit('end-game', room)
 }

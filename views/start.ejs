@@ -4,8 +4,8 @@
 
   <div class="row">
     <div class="col">
-      <h3 class="d-flex justify-content-center">Red Team  -  <%= redTeamScore %></h3>
-      <% players.forEach(player => { %>
+      <h3 class="d-flex justify-content-center">Red Team  -  <%= room.redTeamScore %></h3>
+      <% room.players.forEach(player => { %>
         <div class="row">
           <div class="col d-flex justify-content-center">
             <% if (player.team == 'red') { %>
@@ -16,8 +16,8 @@
       <% }) %>
       </div>
       <div class="col">
-        <h3 class="d-flex justify-content-center">Blue Team  -  <%= blueTeamScore %></h3>
-        <% players.forEach(player => { %>
+        <h3 class="d-flex justify-content-center">Blue Team  -  <%= room.blueTeamScore %></h3>
+        <% room.players.forEach(player => { %>
           <div class="row">
             <div class="col d-flex justify-content-center">
               <% if (player.team == 'blue') { %>
@@ -35,25 +35,40 @@
 </br>
 </br>
 </br>
-        <% players.forEach(player => { %>
+      <% if ((room.blueTeamScore + room.redTeamScore) >= ((room.pot1.length + room.pot2.length) * 4)) { %>
+        <div class="row">
+          <div class="col d-flex justify-content-center">    
+            <button id="endGameButton" type="submit" class="btn btn-danger" onclick="endGame();">End Game</button>
+          </div>
+        </div>
+        <% } else { %>
+        <% room.players.forEach(player => { %>
           <% if (player.position === currentPlayer && player.name === user) { %>
             <div class="row">
               <div class="col d-flex justify-content-center">
-                <button id="startButton" type="submit" onclick="startTimer();">Start</button>
+                <button id="startButton" class="btn btn-success" type="submit" onclick="startTimer();">Start</button>
               </div>
             </div>
             
             <div class="row">
-              <div class="col">
-                <p id="word"></p>
+              <div class="col d-flex justify-content-center">
+                <h3 id="word"></h3>
               </div>
-              <div class="col">
-                <button id="nextButton" type="submit" onclick="nextWord();" style="display: none;">Next</button>
+            </div>
+            <div class="row">
+              <div class="col d-flex justify-content-center">
+                <button id="nextButton" class="btn btn-warning" type="submit" onclick="nextWord();" style="display: none;">Next</button>
               </div>
             </div>
 
         <% } %>
        <% }) %>
+        <div class="row margin-top">
+          <div class="col d-flex justify-content-center">
+            <h3 id="round"><%= room.currentRound %></h3>
+          </div>
+        </div>
+       <% } %>
 
   </br>
 </br>
@@ -64,12 +79,6 @@
         <h3 id="countdown"></h3>
       </div>
     </div>
-
-    <div class="row">
-      <div class="col">
-        <h3 id="round"><%= currentRound %></h3>
-      </div>
-    </div>
 </div>
 <% } else { %>
   <h3>Please sign in</h3>
@@ -78,7 +87,7 @@
 <script>
   var timeout = true;
   var currentPlayer=<%= currentPlayer %>;
-  var room='<%- room %>';
-  var score = <%= redTeamScore + blueTeamScore %>;
+  var room='<%- room.room %>';
+  var score = <%= room.redTeamScore + room.blueTeamScore %>;
 </script>
 <%- include('partials/footer') %>
