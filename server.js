@@ -76,7 +76,6 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
   var blueTeam = []
 
   app.get('/', (req, res) => {
-    console.log(rooms)
     res.render('index', { user: req.session.passport })
   })
 
@@ -229,12 +228,6 @@ io.on('connection', socket => {
       }
     }, 1000);
   })
-
-  // socket.on('change-round', () => {
-  //   console.log('hello')
-  //   socket.emit('change-display')
-  // })
-
 })
 
 function newPlayer(player) {

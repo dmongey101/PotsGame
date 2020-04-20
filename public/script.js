@@ -288,9 +288,19 @@ function startTimer() {
 function nextWord() {
   var wordToRemove = $('#word').html()
   var totalScore = (redTeamScore + blueTeamScore + score) + 1
+  var totalWords = potArray1.length + potArray2.length
 
-  if(totalScore < potArray1.length) {
+  if (totalScore < totalWords) {
   round = "Articulate"
+  }
+  if (totalScore >= totalWords) {
+    round = "Charades"
+  }
+  if (totalScore >= totalWords * 2) {
+    round = "One Word"
+  }
+  if (totalScore >= totalWords * 3) {
+    round = "One Action"
   }
   var i = potArray1.indexOf(wordToRemove)
   if (i > -1) {

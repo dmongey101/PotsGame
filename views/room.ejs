@@ -1,5 +1,5 @@
 <%- include('partials/header') %>
-    
+<% if (user) { %>
   <div id="player-container">
   </div>
 
@@ -31,6 +31,8 @@
         </form>      
       </div>
   </div>
-  
+  <% } else { %>
+    <h3>Please sign in</h3>
+  <% } %>
 </body>
 <%- include('partials/footer') %>

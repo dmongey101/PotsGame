@@ -1,5 +1,6 @@
 
   <%- include('partials/header') %>
+  <% if (user) { %>
   <div id="createRoomModal" class="modal" style="display: none;">
     <div class="modal-content">
         <h1 class="modal-title">Create Room</h1>
@@ -34,5 +35,8 @@
       <button class="btn btn-primary" onclick="showRoomForm();">New Room</button>
     </div>
   </div>
+  <% } else { %>
+    <h3>Please sign in</h3>
+  <% } %>
 </body>
 <%- include('partials/footer') %>
