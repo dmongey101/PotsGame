@@ -220,6 +220,15 @@ socket.on('show-pot', data => {
   $('#nextButton').show()
 })
 
+socket.on('send-round', round => {
+  document.getElementById('round').innerHTML = round
+})
+
+socket.on('send-score', data => {
+  document.getElementById('redTeam').innerHTML = `Red Team - ${data.redScore}`
+  document.getElementById('blueTeam').innerHTML = `Blue Team - ${data.blueScore}`
+})
+
 socket.on('game-ended', () => {
   var roomsURL = `${url}/rooms`
   window.location = roomsURL 
@@ -290,9 +299,17 @@ function nextWord() {
       document.getElementById('round').innerHTML = "Articulate"
       round = "Game Over"
     }
+
+    socket.emit('change-round', round)
   }
 
   currentPlayer % 2 == 1 ? redTeamScore ++ : blueTeamScore ++
+
+  currentPlayer % 2 == 1 ? redScore ++ : blueScore ++
+
+  socket.emit('change-score', { redScore: redScore, blueScore: blueScore })
+
+
 
   var word = potArray1[Math.floor(Math.random() * potArray1.length)]
   document.getElementById('word').innerHTML = word

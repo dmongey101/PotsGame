@@ -4,7 +4,7 @@
 
   <div class="row">
     <div class="col">
-      <h3 class="d-flex justify-content-center">Red Team  -  <%= room.redTeamScore %></h3>
+      <h3 id="redTeam" class="d-flex justify-content-center">Red Team  -  <%= room.redTeamScore %></h3>
       <% room.players.forEach(player => { %>
         <div class="row">
           <div class="col d-flex justify-content-center">
@@ -16,7 +16,7 @@
       <% }) %>
       </div>
       <div class="col">
-        <h3 class="d-flex justify-content-center">Blue Team  -  <%= room.blueTeamScore %></h3>
+        <h3 id="blueTeam" class="d-flex justify-content-center">Blue Team  -  <%= room.blueTeamScore %></h3>
         <% room.players.forEach(player => { %>
           <div class="row">
             <div class="col d-flex justify-content-center">
@@ -88,6 +88,8 @@
   var timeout = true;
   var currentPlayer=<%= currentPlayer %>;
   var room='<%- room.room %>';
+  var redScore = <%= room.redTeamScore %>;
+  var blueScore = <%= room.blueTeamScore %>;
   var score = <%= room.redTeamScore + room.blueTeamScore %>;
 </script>
 <%- include('partials/footer') %>

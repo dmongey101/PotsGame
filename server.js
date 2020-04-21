@@ -168,7 +168,9 @@ app.get('/:room/start/:currentPlayer', (req, res) => {
           if (currentPlayer > room.noOfPlayers) {
             currentPlayer = 1
           }
-          var user = req.session.passport.username
+          if (req.session.passport) {
+            var user = req.session.passport.username
+          }
           res.render('start', { currentPlayer: currentPlayer,  user: user, room: room })
         }
    });
@@ -194,15 +196,6 @@ app.post('/nextPlayer', (req, res) => {
     }
   
 })
-
-// app.post('/endGame', (req, res) => {
-//   db.collection('rooms').deleteOne( { room: req.body.room } )
-//   delete rooms[req.body.room]
-//   redTeam = []
-//   blueTeam = []
-
-//   res.redirect('/rooms')
-// })
 
 server.listen(PORT)
 
@@ -231,6 +224,14 @@ io.on('connection', socket => {
         clearInterval(WinnerCountdown);
       }
     }, 1000);
+  })
+
+  socket.on('change-round', round => {
+    io.emit('send-round', round)
+  })
+
+  socket.on('change-score', data => {
+    io.emit('send-score', data)
   })
 
   socket.on('end-game', room => {
