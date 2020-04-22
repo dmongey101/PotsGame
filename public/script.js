@@ -70,12 +70,8 @@ socket.on('room-created', room => {
   roomElement.append(playerForm)
 })
 
-socket.on('player-created', player => {
-  socket.emit('new-user', player.room, player)
-})
-
-socket.on('chat-message', data => {
-  appendMessage(`${data.name}: ${data.message}`)
+socket.on('new-player', room => {
+  socket.emit('join-room', room)
 })
 
 socket.on('counter', count => {
@@ -208,7 +204,7 @@ socket.on('counter', count => {
 })
 
 socket.on('start-game', room => {
-  var gameURL = `${url}/${room}/start/1`
+  var gameURL = `${url}/${room}/start`
   window.location = gameURL
 })
 
@@ -249,6 +245,7 @@ function showRoomForm() {
 function startTimer() {
   $("#startButton").hide()
   timeout = false;
+  round = $('#round').html()
   socket.emit('start-timer', room)
   }
 

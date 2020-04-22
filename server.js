@@ -149,7 +149,17 @@ app.post('/fourWords', (req, res) => {
   })
   if (rooms[req.body.room].noOfPlayers * 4 == rooms[req.body.room].pot1.length) {
       var players = redTeam.concat(blueTeam)
-      var dbRoom = { 'room': req.body.room, 'noOfPlayers': rooms[req.body.room].noOfPlayers, currentRound: 'Articulate', redTeamScore: 0, blueTeamScore: 0, 'players': players, pot1: rooms[req.body.room].pot1, pot2: [] }
+
+      var dbRoom = { room: req.body.room,
+                     noOfPlayers: rooms[req.body.room].noOfPlayers,
+                     currentPlayer: 1,
+                     currentRound: 'Articulate',
+                     redTeamScore: 0,
+                     blueTeamScore: 0,
+                     players: players,
+                     pot1: rooms[req.body.room].pot1,
+                     pot2: [] }
+
       db.collection('rooms').insertOne(dbRoom, (err, result) => {
         if (err) return console.log(err)
 
@@ -158,13 +168,13 @@ app.post('/fourWords', (req, res) => {
     io.emit('start-game', req.body.room)
   }
 })
-app.get('/:room/start/:currentPlayer', (req, res) => {
+app.get('/:room/start/', (req, res) => {
   db.collection('rooms').findOne({ room: req.params.room }, function (err, room) {
      if (room == null) {
        res.redirect('/rooms')
       } else {
           var noOfPlayers = parseInt(room.noOfPlayers)
-          var currentPlayer = parseInt(req.params.currentPlayer)
+          var currentPlayer = room.currentPlayer
           if (currentPlayer > room.noOfPlayers) {
             currentPlayer = 1
           }
@@ -181,18 +191,20 @@ app.post('/nextPlayer', (req, res) => {
   var pot2 = JSON.parse(req.body.pot2)
   var redTeamScore = parseInt(req.body.redTeamScore)
   var blueTeamScore = parseInt(req.body.blueTeamScore)
-  console.log(req.body.round)
+  var currentPlayer = parseInt(req.body.currentPlayer)
   if (pot1.length != 0) {
-      db.collection('rooms').findOneAndUpdate({room: req.body.room}, { $set: { pot1: pot1, pot2: pot2, currentRound: req.body.round }, $inc: { redTeamScore: redTeamScore, blueTeamScore: blueTeamScore }}, {returnOriginal:false}, (err, room) => {
+      db.collection('rooms').findOneAndUpdate({room: req.body.room}, 
+                                              { $set: { pot1: pot1, pot2: pot2, currentRound: req.body.round, currentPlayer: currentPlayer },
+                                                $inc: { redTeamScore: redTeamScore, blueTeamScore: blueTeamScore }}, {returnOriginal:false}, (err, room) => {
         if (err) {
           console.log(err)
         } else {
           console.log("Updated" + room)
-          res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
+          res.redirect(req.body.room + '/start')
         }
       })
     } else {
-      res.redirect(req.body.room + '/start/' + req.body.currentPlayer)
+      res.redirect(req.body.room + '/start')
     }
   
 })
@@ -200,8 +212,8 @@ app.post('/nextPlayer', (req, res) => {
 server.listen(PORT)
 
 io.on('connection', socket => {
-  socket.on('new-user', (room, player) => {
-    // socket.to(room).broadcast.emit('user-connected', name)
+  socket.on('join-room', room => {
+    socket.join(room)
   })
   socket.on('send-chat-message', (room, message) => {
     socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id] })
