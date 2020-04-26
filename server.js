@@ -72,8 +72,9 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
 );
 
   const rooms = {}
-  var redTeam = []
-  var blueTeam = []
+  var pauseRooms = {}
+  var redTeam = {}
+  var blueTeam = {}
 
   app.get('/', (req, res) => {
     res.render('index', { user: req.session.passport })
@@ -117,6 +118,8 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
     team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
     room: req.body.room
   }
+  blueTeam[req.body.room] = []
+  redTeam[req.body.room] = []
   rooms[req.body.room] = { noOfPlayers: req.body.noOfPlayers, redTeamScore: 0, blueTeamScore: 0, players: [player], pot1: [], pot2: [] }
   assignTeam(player)
   res.redirect(req.body.room)
@@ -147,8 +150,9 @@ app.post('/fourWords', (req, res) => {
   req.body.word.forEach(word => {
     rooms[req.body.room].pot1.push(word)
   })
-  if (rooms[req.body.room].noOfPlayers * 4 == rooms[req.body.room].pot1.length) {
-      var players = redTeam.concat(blueTeam)
+
+  if (rooms[req.body.room].noOfPlayers * 4 == rooms[req.body.room].pot1.length && rooms[req.body.room].players.some(e => e.name === req.session.passport.username)) {
+      var players = redTeam[req.body.room].concat(blueTeam[req.body.room])
 
       var dbRoom = { room: req.body.room,
                      noOfPlayers: rooms[req.body.room].noOfPlayers,
@@ -164,8 +168,11 @@ app.post('/fourWords', (req, res) => {
         if (err) return console.log(err)
 
         console.log('saved to database')
+        delete rooms[req.body.room]
+        console.log(`Deleted room: ${req.body.room}`)
+        pauseRooms[req.body.room] = false
       })
-    io.emit('start-game', req.body.room)
+    io.to(req.body.room).emit('start-game', req.body.room)
   }
 })
 app.get('/:room/start/', (req, res) => {
@@ -214,7 +221,9 @@ server.listen(PORT)
 io.on('connection', socket => {
   socket.on('join-room', room => {
     socket.join(room)
+    console.log('success ' + room)
   })
+
   socket.on('send-chat-message', (room, message) => {
     socket.to(room).broadcast.emit('chat-message', { message: message, name: rooms[room].users[socket.id] })
   })
@@ -228,38 +237,47 @@ io.on('connection', socket => {
       }    
     })
 
-    var counter = 30;
+    var counter = 5;
     var WinnerCountdown = setInterval(function(){
-      io.emit('counter', counter);
-      counter--
+      io.to(room).emit('counter', counter);
+  	  if (!pauseRooms[room]) counter --
+
       if (counter === -1) {
         clearInterval(WinnerCountdown);
       }
     }, 1000);
   })
 
-  socket.on('change-round', round => {
-    io.emit('send-round', round)
+  socket.on('pause-timer', room => {
+    pauseRooms[room] = true
+  })
+
+  socket.on('restart-timer', room => {
+    pauseRooms[room] = false
+  })
+
+  socket.on('change-round', data => {
+    io.to(data.room).emit('send-round', data.round)
   })
 
   socket.on('change-score', data => {
-    io.emit('send-score', data)
+    io.to(data.room).emit('send-score', data)
   })
 
   socket.on('end-game', room => {
     db.collection('rooms').deleteOne( { room: room } )
-    delete rooms[room]
-    redTeam = []
-    blueTeam = []
-    io.emit('game-ended')
+    delete redTeam[room]
+    delete blueTeam[room]
+    delete pauseRooms[room]
+    io.to(room).emit('game-ended')
   })
 })
 
 function newPlayer(player) {
   assignTeam(player)
     if (rooms[player.room].players.length == rooms[player.room].noOfPlayers) {
-      setRedTeamNo(redTeam)
-      setBlueTeamNo(blueTeam)
+      setRedTeamNo(redTeam[player.room])
+      setBlueTeamNo(blueTeam[player.room])
     } else {
     }
 }
@@ -283,18 +301,18 @@ function setBlueTeamNo(blueTeam) {
 function assignTeam(player) {
   var room = player.room
   if (player.team === 'blue') {
-      if (blueTeam.length >= rooms[room].noOfPlayers / 2) {
+      if (blueTeam[room].length >= rooms[room].noOfPlayers / 2) {
         player.team = 'red'
-        redTeam.push(player)
+        redTeam[room].push(player)
       } else {
-        blueTeam.push(player)
+        blueTeam[room].push(player)
       }
     } else {
-      if (redTeam.length >= rooms[room].noOfPlayers / 2) {
+      if (redTeam[room].length >= rooms[room].noOfPlayers / 2) {
         player.team = 'blue'
-        blueTeam.push(player)
+        blueTeam[room].push(player)
       } else {
-        redTeam.push(player)
+        redTeam[room].push(player)
       }
     }
 }

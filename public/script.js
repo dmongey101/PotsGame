@@ -1,5 +1,5 @@
-const url = 'https://com-pots.herokuapp.com'
-// const url = 'http://localhost:3000'
+// const url = 'https://com-pots.herokuapp.com'
+const url = 'http://localhost:3000'
 const socket = io(url)
 const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
@@ -16,6 +16,9 @@ var potArray2 = []
 var redTeamScore = 0
 var blueTeamScore = 0
 var round
+var room
+var roomName
+
 
 $("#fourWords").submit(function(e) {
 
@@ -33,6 +36,11 @@ $("#fourWords").submit(function(e) {
          });
     $('#fourWordsModal').hide();
 
+});
+
+socket.on('connect', () => {
+  if (room != undefined) socket.emit('join-room', room)
+  if (roomName != undefined) socket.emit('join-room', roomName)
 });
 
 
@@ -70,13 +78,13 @@ socket.on('room-created', room => {
   roomElement.append(playerForm)
 })
 
-socket.on('new-player', room => {
-  socket.emit('join-room', room)
-})
-
 socket.on('counter', count => {
   document.getElementById("countdown").innerHTML = count
-  if (count===0) {
+  
+  var totalScore = (redTeamScore + blueTeamScore + score)
+  if (totalScore != 0 && totalScore == potArray1.length * 4) count = 0
+  if (count < 2) $('#pauseTimerButton').hide()
+  if (count==0) {
     
     if (timeout == true) {
         var counter = 1;
@@ -214,6 +222,7 @@ socket.on('show-pot', data => {
   var firstWord = potArray1[Math.floor(Math.random() * potArray1.length)]
   document.getElementById('word').innerHTML = firstWord
   $('#nextButton').show()
+  $('#pauseTimerButton').show()
 })
 
 socket.on('send-round', round => {
@@ -248,6 +257,18 @@ function startTimer() {
   round = $('#round').html()
   socket.emit('start-timer', room)
   }
+
+ function pauseTimer() {
+   $('#nextButton').prop('disabled', true);
+   $('#restartTimerButton').show()
+   socket.emit('pause-timer', room)
+ }
+
+ function restartTimer() {
+    $('#nextButton').prop('disabled', false);
+   $('#restartTimerButton').hide()
+   socket.emit('restart-timer', room)
+ }
 
 function nextWord() {
   var wordToRemove = $('#word').html()
@@ -293,18 +314,18 @@ function nextWord() {
       round = "One Action"
     }
     if(totalScore == potArray1.length * 4) {
-      document.getElementById('round').innerHTML = "Articulate"
+      document.getElementById('round').innerHTML = "Game Over"
       round = "Game Over"
     }
 
-    socket.emit('change-round', round)
+    socket.emit('change-round', { round: round, room: room})
   }
 
   currentPlayer % 2 == 1 ? redTeamScore ++ : blueTeamScore ++
 
   currentPlayer % 2 == 1 ? redScore ++ : blueScore ++
 
-  socket.emit('change-score', { redScore: redScore, blueScore: blueScore })
+  socket.emit('change-score', { redScore: redScore, blueScore: blueScore, room: room })
 
 
 
