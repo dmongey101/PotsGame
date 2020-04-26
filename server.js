@@ -237,7 +237,7 @@ io.on('connection', socket => {
       }    
     })
 
-    var counter = 5;
+    var counter = 30;
     var WinnerCountdown = setInterval(function(){
       io.to(room).emit('counter', counter);
   	  if (!pauseRooms[room]) counter --

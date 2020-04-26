@@ -1,5 +1,5 @@
-// const url = 'https://com-pots.herokuapp.com'
-const url = 'http://localhost:3000'
+const url = 'https://com-pots.herokuapp.com'
+// const url = 'http://localhost:3000'
 const socket = io(url)
 const messageContainer = document.getElementById('message-container')
 const roomContainer = document.getElementById('room-container')
